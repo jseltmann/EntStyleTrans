@@ -2,6 +2,7 @@ import tensorflow as tf
 from tensorflow.keras import layers
 import tensorflow_datasets as tfds
 import tensorflow_probability as tfp
+import argparse
 
 ## hyperparameters: (originally from Bowman et.al., might change in the future)
 lstm_dim = 191
@@ -19,15 +20,22 @@ BUFFER_SIZE = 10000
 BATCH_SIZE = 64
 max_len = 25
 
-train_dataset = train_dataset.map(lambda x,y : (x,x))
+def to_one_hot(x):
+    true = tf.cast(x, tf.int32)
+    true = tf.one_hot(true, vocab_size)
+    return true
+
+train_dataset = train_dataset.map(lambda x,y : (x[:max_len],x[:max_len]))
 train_dataset = train_dataset.shuffle(BUFFER_SIZE)
-train_dataset = train_dataset.filter(lambda x,y: len(x) <= max_len)
 train_dataset = train_dataset.padded_batch(BATCH_SIZE, ((max_len,),(max_len,)))
+train_dataset = train_dataset.map(lambda x,y : (x,to_one_hot(x)))
 
-
-test_dataset = test_dataset.map(lambda x,y : (x,x))
-test_dataset = test_dataset.filter(lambda x,y: len(x) <= max_len)
+test_dataset = test_dataset.map(lambda x,y : (x[:max_len],x[:max_len]))
+test_dataset = test_dataset.shuffle(BUFFER_SIZE)
 test_dataset = test_dataset.padded_batch(BATCH_SIZE, ((max_len,),(max_len,)))
+test_dataset = test_dataset.map(lambda x,y : (x,to_one_hot(x)))
+
+
 
 emb_layer = tf.keras.layers.Embedding(vocab_size, embedding_dim, name='emb')
 
@@ -45,7 +53,6 @@ epsilon = dist.sample(sample_shape=(z_dim,))
 
 z = mu + epsilon * sigma
 inf_net = tf.keras.Model(inputs, z)
-#inf_net.summary()
 
 
 # build generator net
@@ -70,8 +77,6 @@ inds_out = []
 
 for state in gen_out_list:
     inds_vector = state_to_inds(state)
-    #inds = tf.cast(tf.argmax(inds_vector, axis=1), tf.float32)
-    #inds_out.append(inds)
     inds_out.append(inds_vector)
 
     
@@ -79,7 +84,6 @@ for state in gen_out_list:
 
 
 
-#gen_net = tf.keras.Model([gen_inputs, gen_z], gen_out)
 gen_net = tf.keras.Model([gen_inputs, gen_z], inds_out)
 
 
@@ -90,16 +94,9 @@ vae = tf.keras.Model(inputs, outputs)
 
 
 def vae_loss(true, pred):
-    true = tf.cast(true, tf.int32)
-    true = tf.one_hot(true, vocab_size)
-    print(true[0].shape)
-    print(pred[0].shape)
-    print("---------------------")
     reconstruction_loss = tf.keras.losses.MeanSquaredError()(true, pred)
-    #reconstruction_loss = tf.keras.losses.MeanAbsoluteError()(true, pred)
     reconstruction_loss *= max_len
 
-    #return reconstruction_loss
     kl_loss = 1 + sigma - tf.square(mu) - tf.exp(sigma)
     kl_loss = -0.5 * tf.reduce_sum(kl_loss, 1)
 
@@ -108,13 +105,21 @@ def vae_loss(true, pred):
     return loss
 
 
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--weightsfn", default="model_weights")
+    parser.add_argument("--modelfn", default="model.hd5")
 
-vae.compile(optimizer=tf.keras.optimizers.Adam(),
-            loss=vae_loss)#,
-            #metrics=['accuracy'])
+    args = parser.parse_args()
+    weights_filename = args.weightsfn
+    model_filename = args.modelfn
 
+    vae.compile(optimizer=tf.keras.optimizers.Adam(),
+                loss=vae_loss)
 
-history = vae.fit(train_dataset,
-                  epochs=1,
-                  validation_data=test_dataset)
+    history = vae.fit(train_dataset,
+                      epochs=1,
+                      validation_data=test_dataset)
 
+    model.save_weights(weights_filename)
+    model.save(model_filename)
