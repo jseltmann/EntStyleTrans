@@ -121,5 +121,5 @@ if __name__ == "__main__":
                       epochs=1,
                       validation_data=test_dataset)
 
-    model.save_weights(weights_filename)
-    model.save(model_filename)
+    vae.save_weights(weights_filename)
+    #vae.save(model_filename)
