@@ -4,6 +4,7 @@ import tensorflow_datasets as tfds
 import tensorflow_probability as tfp
 import argparse
 import pickle
+import numpy as np
 
 ## hyperparameters: (originally from Bowman et.al., might change in the future)
 lstm_dim = 191
@@ -19,7 +20,8 @@ vocab_size = tokenizer.vocab_size
 #BUFFER_SIZE = 10000
 #BATCH_SIZE = 64
 max_len = 25
-start_ind = 19#np.ndarray([19], dtype=np.float32)
+#start_ind = 19#np.ndarray([19], dtype=np.float32)
+start_ind = np.array([19], dtype=np.float32)
 
 
 
@@ -55,9 +57,14 @@ class SentVae(tf.keras.Model):
             #inp_inds = tf.transpose(inputs, perm=[1,0,2])
             inp_inds = tf.transpose(inputs, perm=[1,0])
             inds_out = []
-
             for ind in tf.unstack(inp_inds):
-                emb = tf.reshape(self.emb_layer(ind), (1,embedding_dim))
+                #print(self.emb_layer(ind).shape)
+                #emb = tf.expand_dims(self.emb_layer(ind), axis=0)
+                emb = self.emb_layer(ind)
+                #emb = tf.reshape(self.emb_layer(ind), (1,embedding_dim))
+                #print(emb.shape)
+                #print(h.shape)
+                #print(c.shape)
                 curr_out, (h,c) = self.gen_lstm_layer(emb, states=[h,c])
                 ind = self.state_to_inds(curr_out)
                 inds_out.append(ind)
@@ -65,17 +72,21 @@ class SentVae(tf.keras.Model):
             #output = (tf.stack(inds_out, axis=1), mu, sigma)
             output = tf.stack(inds_out, axis=1)
         else:
-            emb = tf.reshape(self.emb_layer(start_ind), (1,embedding_dim))
+            #emb = tf.reshape(self.emb_layer(start_ind), (1,embedding_dim))
+            emb = self.emb_layer(start_ind)
             inds_out = []
 
             for _ in range(max_len):
                 curr_out, (h,c) = self.gen_lstm_layer(emb, states=[h,c])
                 new_ind_oh = self.state_to_inds(curr_out)
                 new_ind = tf.argmax(new_ind_oh, axis=1)
-                emb = tf.reshape(self.emb_layer(new_ind), (1,embedding_dim))
+                #emb = tf.reshape(self.emb_layer(new_ind), (1,embedding_dim))
+                #emb = tf.expand_dims(self.emb_layer(new_ind), axis=0)
+                emb = self.emb_layer(new_ind)
                 inds_out.append(new_ind_oh)
             #output = (tf.stack(inds_out, axis=1), mu, sigma)
             output = tf.stack(inds_out, axis=1)
 
         #output = tf.stack(inds_out, axis=1)
+        print(output.shape)
         return output

@@ -24,7 +24,7 @@ train_dataset, test_dataset = dataset['train'], dataset['test']
 tokenizer = info.features['text'].encoder
 vocab_size = tokenizer.vocab_size
 BUFFER_SIZE = 10000
-BATCH_SIZE = 64
+BATCH_SIZE = 8#64
 max_len = 25
 
 #with open(train_data_path, "rb") as tdf:
@@ -96,8 +96,10 @@ if __name__ == "__main__":
     model_filename = args.modelfn
     logdir = args.logdir
 
+    
     vae.compile(optimizer=tf.keras.optimizers.Adam(),
-                loss=vae_loss)
+                loss=vae_loss)#,
+                #options=run_opts)
 
     #tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
     history = vae.fit(train_dataset,
@@ -109,9 +111,9 @@ if __name__ == "__main__":
     #                  validation_data=(test_dataset,test_dataset))
 
     #w = inf_net.layers[-1].weights
-    #vae.save_weights(weights_filename + "/vae")
+    vae.save_weights(weights_filename + "/vae")
     #print(inf_net.layers[-1].weights == w)
 
     #inf_net.save_weights(weights_filename + "/inf_net")
     #init_state_model.save_weights(weights_filename + "/init_state")
-    vae.save(model_filename)
+    #vae.save(model_filename)
