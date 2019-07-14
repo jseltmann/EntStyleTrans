@@ -24,6 +24,13 @@ max_len = 25
 start_ind = np.array([19], dtype=np.float32)
 
 
+def to_inds(sent):
+    inds = tokenizer.encode(sent)
+    pad_len = max_len - len(inds)
+    inds += [0] * pad_len
+    inds = np.array(inds).reshape((1,max_len))
+    return inds
+
 
 class SentVae(tf.keras.Model):
 
@@ -34,6 +41,8 @@ class SentVae(tf.keras.Model):
         self.inf_lstm = tf.keras.layers.RNN(cell=tf.keras.layers.LSTMCell(lstm_dim), name='inf_out')
         self.mu_layer = tf.keras.layers.Dense(z_dim, name='mu')
         self.sigma_layer = tf.keras.layers.Dense(z_dim, name='sigma')
+        self.mu = [0] * z_dim
+        self.sigma = [0] * z_dim
 
         self.init_state_layer = tf.keras.layers.Dense(lstm_dim, input_shape=(z_dim,), name='init_state')
         self.gen_lstm_layer = tf.keras.layers.LSTMCell(lstm_dim, name='gen_lstm_layer')
@@ -44,7 +53,9 @@ class SentVae(tf.keras.Model):
         inf_out = self.inf_lstm(inf_emb)
 
         mu = self.mu_layer(inf_out)
+        self.mu = mu
         sigma = self.sigma_layer(inf_out)
+        self.sigma = sigma
 
         dist = tfp.distributions.Normal(loc=0., scale=1.)
         epsilon = dist.sample(sample_shape=(z_dim,))
@@ -90,3 +101,43 @@ class SentVae(tf.keras.Model):
         #output = tf.stack(inds_out, axis=1)
         print(output.shape)
         return output
+
+    def inference(sent):
+        inds = to_inds(sent)
+
+        #for ind in inds:
+        #    emb = self.emb_layer(ind)
+        embedded = self.emb_layer(ind)
+        inf_out = self.inf_lstm(embedded)
+
+        mu = self.mu_layer(inf_out)
+        sigma = self.sigma_layer(inf_out)
+
+        return mu, sigma
+
+    def sample_z(mu, sigma):
+        dist = tfp.distributions.Normal(loc0., scale=1.)
+        epsilon = dist.sample(sample_shape=(z_dim,))
+
+        z = tf.add(mu, tf.math.multiply(epsilon, sigma))
+
+        return z
+
+    def generate(z):
+        init_state = self.init_state_layer(z)
+        h, c = init_state, init_state
+            
+        emb = self.emb_layer(start_ind)
+        inds_out = []
+
+        for _ in range(max_len):
+            curr_out, (h,c) = self.gen_lstm_layer(emb, states=[h,c])
+            new_ind_oh = self.state_to_inds(curr_out)
+            new_ind = tf.argmax(new_ind_oh, axis=1)
+            emb = self.emb_layer(new_ind)
+            inds_out.append(new_ind)
+
+        sent = to_words(inds_out)
+
+        return sent
+        
