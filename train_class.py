@@ -47,10 +47,8 @@ def to_one_hot(x):
 #train_data = [to_one_hot(x) for x in train_data]
 #dev_data = [to_one_hot(x) for x in dev_data]
 
-#train_dataset = train_dataset.map(lambda x,y : ((x[:max_len],x[:max_len]),x[:max_len]))
 train_dataset = train_dataset.map(lambda x,y : (x[:max_len],x[:max_len]))
 train_dataset = train_dataset.shuffle(BUFFER_SIZE)
-#train_dataset = train_dataset.padded_batch(BATCH_SIZE, (((max_len,),(max_len,)),(max_len,)))
 train_dataset = train_dataset.padded_batch(BATCH_SIZE, ((max_len,),(max_len,)))
 train_dataset = train_dataset.map(lambda x,y : (x,to_one_hot(x)))
 
@@ -64,10 +62,6 @@ vae = SentVae()
 
 
 def vae_loss(true, pred):
-    #true = true[0]
-    #pred_out = pred[0]
-    #mu = pred[1]
-    #sigma = pred[2]
     reconstruction_loss = tf.keras.losses.MeanSquaredError()(true, pred)
     reconstruction_loss *= max_len
 
@@ -88,7 +82,6 @@ def vae_loss(true, pred):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--weightsfn", default="model_weights")
-    parser.add_argument("--modelfn", default="model.hd5")
     parser.add_argument("--logdir", default="logs")
 
     args = parser.parse_args()
@@ -98,8 +91,7 @@ if __name__ == "__main__":
 
     
     vae.compile(optimizer=tf.keras.optimizers.Adam(),
-                loss=vae_loss)#,
-                #options=run_opts)
+                loss=vae_loss)
 
     #tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
     history = vae.fit(train_dataset,
@@ -110,10 +102,4 @@ if __name__ == "__main__":
     #                  epochs=1,
     #                  validation_data=(test_dataset,test_dataset))
 
-    #w = inf_net.layers[-1].weights
-    vae.save_weights(weights_filename + "/vae")
-    #print(inf_net.layers[-1].weights == w)
-
-    #inf_net.save_weights(weights_filename + "/inf_net")
-    #init_state_model.save_weights(weights_filename + "/init_state")
-    #vae.save(model_filename)
+    vae.save_weights(weights_filename)

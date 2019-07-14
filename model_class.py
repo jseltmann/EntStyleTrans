@@ -31,6 +31,10 @@ def to_inds(sent):
     inds = np.array(inds).reshape((1,max_len))
     return inds
 
+def to_words(inds):
+    inds = [ind.numpy()[0] for ind in inds]
+    words = tokenizer.decode(inds)
+    return words
 
 class SentVae(tf.keras.Model):
 
@@ -99,15 +103,14 @@ class SentVae(tf.keras.Model):
             output = tf.stack(inds_out, axis=1)
 
         #output = tf.stack(inds_out, axis=1)
-        print(output.shape)
         return output
 
-    def inference(sent):
+    def inference(self, sent):
         inds = to_inds(sent)
 
         #for ind in inds:
         #    emb = self.emb_layer(ind)
-        embedded = self.emb_layer(ind)
+        embedded = self.emb_layer(inds)
         inf_out = self.inf_lstm(embedded)
 
         mu = self.mu_layer(inf_out)
@@ -115,15 +118,15 @@ class SentVae(tf.keras.Model):
 
         return mu, sigma
 
-    def sample_z(mu, sigma):
-        dist = tfp.distributions.Normal(loc0., scale=1.)
+    def sample_z(self, mu, sigma):
+        dist = tfp.distributions.Normal(loc=0., scale=1.)
         epsilon = dist.sample(sample_shape=(z_dim,))
 
         z = tf.add(mu, tf.math.multiply(epsilon, sigma))
 
         return z
 
-    def generate(z):
+    def generate(self, z):
         init_state = self.init_state_layer(z)
         h, c = init_state, init_state
             
