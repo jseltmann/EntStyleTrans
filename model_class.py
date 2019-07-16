@@ -11,18 +11,33 @@ lstm_dim = 191
 z_dim = 13
 embedding_dim = 353
 
+train_data_path = "data/yelp_train.pkl"
+dev_data_path = "data/yelp_dev.pkl"
+word_inds_path = "data/yelp_word_inds.pkl"
+
+
 # remove this part once we have preprocessed data
-dataset, info = tfds.load('imdb_reviews/subwords8k', with_info=True,
-                          as_supervised=True)
+#dataset, info = tfds.load('imdb_reviews/subwords8k', with_info=True,
+#                          as_supervised=True)
 #train_dataset, test_dataset = dataset['train'], dataset['test']
-tokenizer = info.features['text'].encoder
-vocab_size = tokenizer.vocab_size
+#tokenizer = info.features['text'].encoder
+#vocab_size = tokenizer.vocab_size
 #BUFFER_SIZE = 10000
 #BATCH_SIZE = 64
 max_len = 25
 #start_ind = 19#np.ndarray([19], dtype=np.float32)
 start_ind = np.array([19], dtype=np.float32)
 
+with open(train_data_path, "rb") as tdf:
+    train_data = pickle.load(tdf)
+with open(dev_data_path, "rb") as ddf:
+    dev_data = pickle.load(ddf)
+with open(word_inds_path, "rb") as wif:
+    word_inds = pickle.load(wif)
+    word2num = word_inds["word2num"]
+    num2word = word_inds["num2word"]
+
+vocab_size = len(word2num)
 
 def to_inds(sent):
     inds = tokenizer.encode(sent)

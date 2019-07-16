@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 from tensorflow.keras import layers
 import tensorflow_datasets as tfds
 import tensorflow_probability as tfp
@@ -18,26 +19,44 @@ embedding_dim = 353
 
 
 # remove this part once we have preprocessed data
-dataset, info = tfds.load('imdb_reviews/subwords8k', with_info=True,
-                          as_supervised=True)
-train_dataset, test_dataset = dataset['train'], dataset['test']
-tokenizer = info.features['text'].encoder
-vocab_size = tokenizer.vocab_size
+#dataset, info = tfds.load('imdb_reviews/subwords8k', with_info=True,
+#                          as_supervised=True)
+#train_dataset, test_dataset = dataset['train'], dataset['test']
+#for el in train_dataset:
+#    print(el)
+#    break
+#tokenizer = info.features['text'].encoder
+#vocab_size = tokenizer.vocab_size
 BUFFER_SIZE = 10000
 BATCH_SIZE = 8#64
 max_len = 25
 
-#with open(train_data_path, "rb") as tdf:
-#    train_data = pickle.load(tdf)
-#with open(dev_data_path, "rb") as ddf:
-#    dev_data = pickle.load(ddf)
-#with open(word_inds_path, "rb") as wif:
-#    word_inds = pickle.load(wif)
-#    word2num = word_inds["word2num"]
-#    num2word = word_inds["num2word"]
-#
-#vocab_size = len(word2num)
+with open(train_data_path, "rb") as tdf:
+    train_data = pickle.load(tdf)
+with open(dev_data_path, "rb") as ddf:
+    dev_data = pickle.load(ddf)
+with open(word_inds_path, "rb") as wif:
+    word_inds = pickle.load(wif)
+    word2num = word_inds["word2num"]
+    num2word = word_inds["num2word"]
 
+
+def train_data_generator():
+    for el in train_data:
+        yield (el, el)
+
+def test_data_generator():
+    for el in dev_data:
+        yield (el, el)
+
+vocab_size = len(word2num)
+
+train_dataset = tf.data.Dataset.from_generator(train_data_generator, (tf.int32, tf.int32))
+test_dataset = tf.data.Dataset.from_generator(test_data_generator, (tf.int32, tf.int32))
+
+#for el in train_dataset:
+#    print(el)
+#    break
 
 def to_one_hot(x):
     true = tf.cast(x, tf.int32)
@@ -47,14 +66,16 @@ def to_one_hot(x):
 #train_data = [to_one_hot(x) for x in train_data]
 #dev_data = [to_one_hot(x) for x in dev_data]
 
-train_dataset = train_dataset.map(lambda x,y : (x[:max_len],x[:max_len]))
+#train_dataset = train_dataset.map(lambda x,y : (x[:max_len],x[:max_len]))
 train_dataset = train_dataset.shuffle(BUFFER_SIZE)
-train_dataset = train_dataset.padded_batch(BATCH_SIZE, ((max_len,),(max_len,)))
+#train_dataset = train_dataset.padded_batch(BATCH_SIZE, ((max_len,),(max_len,)))
+train_dataset = train_dataset.batch(BATCH_SIZE)
 train_dataset = train_dataset.map(lambda x,y : (x,to_one_hot(x)))
-
-test_dataset = test_dataset.map(lambda x,y : (x[:max_len],x[:max_len]))
+##
+##test_dataset = test_dataset.map(lambda x,y : (x[:max_len],x[:max_len]))
 test_dataset = test_dataset.shuffle(BUFFER_SIZE)
-test_dataset = test_dataset.padded_batch(BATCH_SIZE, ((max_len,),(max_len,)))
+#test_dataset = test_dataset.padded_batch(BATCH_SIZE, ((max_len,),(max_len,)))
+test_dataset = test_dataset.batch(BATCH_SIZE)
 test_dataset = test_dataset.map(lambda x,y : (x,to_one_hot(x)))
 
 
@@ -86,7 +107,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     weights_filename = args.weightsfn
-    model_filename = args.modelfn
+    #model_filename = args.modelfn
     logdir = args.logdir
 
     
@@ -94,10 +115,12 @@ if __name__ == "__main__":
                 loss=vae_loss)
 
     #tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
+    print("AAAAAAAAAAAAAAAAAAAAAA")
     history = vae.fit(train_dataset,
                       epochs=1,
                       validation_data=test_dataset)#,
-                      #callbacks=[tensorboard_callback])
+    print("BBBBBBBBBBBBBBBBBBBBBB")
+    #                  #callbacks=[tensorboard_callback])
     #history = va.fit(train_data, train_data,
     #                  epochs=1,
     #                  validation_data=(test_dataset,test_dataset))
