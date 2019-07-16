@@ -1,27 +1,19 @@
 from model_class import SentVae
 import numpy as np
+import tensorflow as tf
 
 zs = [[0] * 13,
       [1] * 13,
       [10] * 13,
       [100000] * 13,
       [1] + [0] * 12,
-      [0] + [1] + [0] * 11,
-      [0] * 2 + [1] + [0] * 10,
-      [0] * 3 + [1] + [0] * 9,
-      [0] * 4 + [1] + [0] * 8,
-      [0] * 5 + [1] + [0] * 7,
-      [0] * 6 + [1] + [0] * 6,
-      [0] * 7 + [1] + [0] * 5,
       [0] * 8 + [1] + [0] * 4,
-      [0] * 9 + [1] + [0] * 3,
-      [0] * 10 + [1] + [0] * 2,
-      [0] * 11 + [1] + [0] * 1,
       [0] * 12 + [1],
       [-1] * 13,
-      [-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1],
-      list(range(13)),
-      list(range(13)).reverse()]
+      [25] * 13,
+      [48] * 6 + [-48] * 7,
+      [-10000] * 13,
+      [123,456,789] * 4 + [123]]
 
 sents = ["ok never going back to this place again .",
          "easter day nothing open , heard about this place figured it would ok .",
@@ -38,7 +30,7 @@ def test_vae(weights_filename, log_filename):
 
     inferred = []
     with open(log_filename, "w") as log_file:
-        for sent in sents
+        for sent in sents:
             mu, sigma = vae.inference(sent)
             z = vae.sample_z(mu, sigma)
             new_sent = vae.generate(z)
@@ -55,8 +47,13 @@ def test_generator(weights_filename, log_filename):
     
     with open(log_filename, "w") as log_file:
         for z in zs:
+            z = np.array(z)
+            z = z.reshape((1,13))
+            z = z.astype(np.float32)
             sent = vae.generate(z)
             log_file.write(str(z) + "\n")
             log_file.write(sent + "\n")
             log_file.write("\n\n")
     
+#test_vae("model_weights/vae", "analyze_vae.log")
+test_generator("model_weights/vae", "analyze_generator2.log")
