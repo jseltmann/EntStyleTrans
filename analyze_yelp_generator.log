@@ -1,0 +1,50 @@
+[[0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]]
+<START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START>
+
+
+[[1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1.]]
+<START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START>
+
+
+[[10. 10. 10. 10. 10. 10. 10. 10. 10. 10. 10. 10. 10.]]
+out out out out out out out out out out out out out out out out out out out out out out out out out
+
+
+[[100000. 100000. 100000. 100000. 100000. 100000. 100000. 100000. 100000.
+  100000. 100000. 100000. 100000.]]
+a a a a a a a a a a a a a a a a a a a a a a a a a
+
+
+[[1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]]
+<START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START>
+
+
+[[0. 0. 0. 0. 0. 0. 0. 0. 1. 0. 0. 0. 0.]]
+<START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START>
+
+
+[[0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1.]]
+<START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START>
+
+
+[[-1. -1. -1. -1. -1. -1. -1. -1. -1. -1. -1. -1. -1.]]
+<START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START> <START>
+
+
+[[25. 25. 25. 25. 25. 25. 25. 25. 25. 25. 25. 25. 25.]]
+a time time time time time time time time time time time time time time time time time time time time time time time time
+
+
+[[ 48.  48.  48.  48.  48.  48. -48. -48. -48. -48. -48. -48. -48.]]
+place if if if if if if if if if if if if if if if if if if if if if if if if
+
+
+[[-10000. -10000. -10000. -10000. -10000. -10000. -10000. -10000. -10000.
+  -10000. -10000. -10000. -10000.]]
+ordered a a a a a a a a a a a a a a a a a a a a a a a a
+
+
+[[123. 456. 789. 123. 456. 789. 123. 456. 789. 123. 456. 789. 123.]]
+<PAD> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD> <PAD>
+
+
